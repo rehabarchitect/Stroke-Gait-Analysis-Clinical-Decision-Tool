@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Stroke Gait Analysis · Rehab Architect</title>
+<style>
+:root {
+  --bg:        #0d1117;
+  --surface:   #161b22;
+  --surface2:  #1c2230;
+  --border:    #2a3344;
+  --accent:    #00c8a0;
+  --accent2:   #0a8f72;
+  --text:      #e6edf3;
+  --muted:     #8b949e;
+  --green:     #2ea043;
+  --yellow:    #d29922;
+  --red:       #da3633;
+  --green-bg:  rgba(46,160,67,.13);
+  --yellow-bg: rgba(210,153,34,.13);
+  --red-bg:    rgba(218,54,51,.13);
+  --radius:    10px;
+  --mono:      'JetBrains Mono','Fira Code',monospace;
+  --sans:      'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6;}
+
+/* HEADER */
+header{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:12px 16px;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:200;
+}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{
+  width:32px;height:32px;background:var(--accent);border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;color:#0d1117;flex-shrink:0;
+}
+.logo-title{font-size:14px;font-weight:700;color:var(--text);line-height:1.1;}
+.logo-sub{font-size:11px;color:var(--muted);}
+.lang-toggle{display:flex;gap:3px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:3px;}
+.lang-btn{
+  padding:6px 16px;border-radius:6px;border:none;cursor:pointer;
+  font-size:12px;font-weight:700;background:transparent;color:var(--muted);
+  transition:all .18s;-webkit-tap-highlight-color:transparent;
+  min-height:36px;
+}
+.lang-btn.active{background:var(--accent);color:#0d1117;}
+
+/* CONTAINER */
+.container{max-width:980px;margin:0 auto;padding:16px 12px 40px;}
+
+/* HERO — compact on mobile */
+.hero{
+  text-align:center;padding:20px 8px 16px;
+  border-bottom:1px solid var(--border);margin-bottom:20px;
+}
+.hero-eyebrow{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;margin-bottom:8px;}
+.hero-title{font-size:20px;font-weight:700;line-height:1.25;margin-bottom:8px;}
+.hero-sub{color:var(--muted);font-size:12px;max-width:560px;margin:0 auto;}
+.disclaimer{
+  display:inline-flex;gap:6px;align-items:center;
+  margin-top:10px;padding:6px 12px;border-radius:20px;
+  background:rgba(210,153,34,.1);border:1px solid rgba(210,153,34,.3);
+  color:var(--yellow);font-size:11px;
+}
+
+/* GRID: desktop 2-col, mobile stacked */
+.grid{display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start;}
+@media(max-width:760px){
+  .grid{grid-template-columns:1fr;}
+  .sidebar{position:static !important;order:99;}
+}
+
+/* PROGRESS BAR */
+.progress-wrap{margin-bottom:14px;}
+.progress-dots{display:flex;gap:3px;}
+.dot{height:4px;flex:1;border-radius:2px;background:var(--border);transition:background .3s;}
+.dot.answered{background:var(--accent);}
+.progress-label{font-size:11px;color:var(--muted);margin-top:5px;text-align:right;}
+
+/* DOMAIN CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:visible;margin-bottom:12px;}
+.card-header{
+  display:flex;align-items:center;gap:10px;
+  padding:13px 14px;border-bottom:1px solid transparent;
+  cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;
+  transition:background .15s;border-radius:var(--radius);
+  min-height:52px;
+}
+.card-header.open{border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom-color:var(--border);}
+.card-header:active{background:var(--surface2);}
+.domain-badge{
+  width:30px;height:30px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;flex-shrink:0;
+}
+.domain-A{background:rgba(0,200,160,.13);}
+.domain-B{background:rgba(88,166,255,.13);}
+.domain-C{background:rgba(210,153,34,.13);}
+.domain-D{background:rgba(188,110,255,.13);}
+.card-title{font-weight:600;font-size:13px;flex:1;line-height:1.3;}
+.domain-score-badge{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:6px;padding:3px 9px;
+  font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:700;
+  flex-shrink:0;white-space:nowrap;
+}
+.chevron{color:var(--muted);font-size:11px;flex-shrink:0;transition:transform .2s;}
+.card-header.open .chevron{transform:rotate(180deg);}
+
+/* WHY panel */
+.card-why{
+  background:rgba(0,200,160,.05);border-bottom:1px solid rgba(0,200,160,.12);
+  padding:10px 14px;font-size:12px;color:rgba(0,200,160,.85);line-height:1.55;
+}
+.card-why-label{
+  font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--accent2);margin-bottom:4px;
+}
+
+/* CARD BODY */
+.card-body{display:none;}
+.card-body.visible{display:block;}
+
+/* ITEM GROUPS */
+.item-group{padding:13px 14px;border-bottom:1px solid var(--border);}
+.item-group:last-child{border-bottom:none;}
+
+.item-header{display:flex;align-items:flex-start;gap:6px;margin-bottom:10px;}
+.item-label-text{font-size:13px;font-weight:500;flex:1;line-height:1.4;}
+
+/* INFO BUTTON — replaces tooltip-wrap to avoid overlay issues */
+.info-btn{
+  flex-shrink:0;width:20px;height:20px;border-radius:50%;
+  border:1px solid var(--border);background:var(--surface2);
+  color:var(--muted);font-size:11px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;-webkit-tap-highlight-color:transparent;
+  margin-top:1px;
+}
+.info-btn:active,.info-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(0,200,160,.1);}
+
+/* INLINE INSIGHT PANEL — slides in below label, no absolute positioning */
+.insight-panel{
+  display:none;
+  background:#1a2640;border:1px solid rgba(0,200,160,.2);
+  border-radius:7px;padding:9px 11px;
+  font-size:12px;color:var(--muted);line-height:1.55;
+  margin-bottom:10px;
+}
+.insight-panel.visible{display:block;}
+
+/* OPTION BUTTONS */
+.options{display:flex;flex-wrap:wrap;gap:7px;}
+.opt-btn{
+  padding:8px 14px;border-radius:20px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);
+  font-size:13px;cursor:pointer;transition:all .15s;
+  font-family:var(--sans);font-weight:500;
+  -webkit-tap-highlight-color:transparent;
+  min-height:38px;/* comfortable tap target */
+}
+.opt-btn:active{opacity:.8;}
+.opt-btn.sel-0{background:var(--green-bg);border-color:var(--green);color:#4ade80;}
+.opt-btn.sel-1{background:rgba(210,153,34,.11);border-color:var(--yellow);color:#fbbf24;}
+.opt-btn.sel-2{background:rgba(251,146,60,.11);border-color:#f97316;color:#fb923c;}
+.opt-btn.sel-3{background:var(--red-bg);border-color:var(--red);color:#f87171;}
+
+/* SIDEBAR */
+.sidebar{position:sticky;top:58px;}
+.score-panel{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;margin-bottom:12px;
+}
+.score-label{
+  font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--muted);margin-bottom:6px;
+}
+.score-num{font-family:var(--mono);font-size:44px;font-weight:700;color:var(--accent);line-height:1;}
+.score-max-lbl{font-size:15px;color:var(--muted);}
+.score-bar-bg{height:5px;background:var(--surface2);border-radius:3px;margin:12px 0 14px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;transition:width .4s,background .4s;background:var(--green);}
+
+.breakdown{background:var(--surface2);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.breakdown-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 12px;font-size:12px;border-bottom:1px solid var(--border);
+}
+.breakdown-row:last-child{border-bottom:none;}
+.br-name{color:var(--muted);}
+.br-score{font-family:var(--mono);font-weight:700;font-size:12px;color:var(--accent);}
+
+/* RESULT CARDS */
+.result-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:13px;margin-bottom:10px;
+}
+.rc-label{
+  font-size:10px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:6px;
+}
+.rc-icon{font-size:17px;margin-bottom:5px;}
+.rc-value{font-size:13px;font-weight:600;line-height:1.4;}
+.rc-note{
+  background:rgba(0,200,160,.06);border-left:3px solid var(--accent);
+  border-radius:0 6px 6px 0;padding:8px 10px;
+  font-size:11px;color:var(--muted);margin-top:9px;line-height:1.55;
+  display:none;
+}
+.rc-note.visible{display:block;}
+
+/* STATUS COLORS */
+.c-green{color:#4ade80;}
+.c-teal{color:#34d399;}
+.c-yellow{color:#fbbf24;}
+.c-orange{color:#fb923c;}
+.c-red{color:#f87171;}
+
+/* FAC BADGE */
+.fac-badge{
+  display:inline-flex;align-items:center;
+  padding:3px 9px;border-radius:5px;font-size:11px;
+  font-family:var(--mono);font-weight:700;margin-top:6px;
+}
+.fb-0{background:rgba(218,54,51,.15);color:#f87171;border:1px solid rgba(218,54,51,.3);}
+.fb-1{background:rgba(218,54,51,.1);color:#fc8585;border:1px solid rgba(218,54,51,.2);}
+.fb-2{background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.3);}
+.fb-3{background:rgba(210,153,34,.12);color:#fbbf24;border:1px solid rgba(210,153,34,.3);}
+.fb-4{background:rgba(0,200,160,.1);color:#34d399;border:1px solid rgba(0,200,160,.25);}
+.fb-5{background:var(--green-bg);color:#4ade80;border:1px solid rgba(46,160,67,.35);}
+
+/* AFO CHIP */
+.afo-chip{
+  display:inline-block;padding:3px 8px;border-radius:4px;
+  font-size:11px;font-weight:700;font-family:var(--mono);margin-top:6px;
+}
+.afo-solid{background:rgba(218,54,51,.15);color:#f87171;border:1px solid rgba(218,54,51,.25);}
+.afo-pls{background:rgba(210,153,34,.12);color:#fbbf24;border:1px solid rgba(210,153,34,.25);}
+.afo-art{background:rgba(88,166,255,.12);color:#7eb9ff;border:1px solid rgba(88,166,255,.25);}
+.afo-no{background:var(--green-bg);color:#4ade80;border:1px solid rgba(46,160,67,.3);}
+.afo-ask{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+
+/* RESET */
+.reset-btn{
+  width:100%;padding:10px;border-radius:8px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--muted);font-size:13px;cursor:pointer;
+  font-family:var(--sans);transition:all .2s;margin-top:8px;
+  min-height:42px;-webkit-tap-highlight-color:transparent;
+}
+.reset-btn:active{border-color:var(--red);color:var(--red);}
+
+/* SIDE NOTE */
+.side-note{
+  background:rgba(0,200,160,.05);border:1px solid rgba(0,200,160,.15);
+  border-radius:8px;padding:10px 12px;
+  font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6;
+}
+.side-note strong{color:var(--accent);}
+
+/* EVIDENCE BAR */
+.evidence-bar{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:12px 14px;margin-top:20px;
+}
+.ev-label{
+  font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--accent);margin-bottom:8px;
+}
+.ev-refs{display:flex;flex-wrap:wrap;gap:6px;}
+.ev-ref{
+  font-size:11px;color:var(--muted);
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:5px;padding:3px 8px;
+}
+
+@media(max-width:480px){
+  .hero-title{font-size:16px;}
+  .card-title{font-size:12px;}
+  .opt-btn{font-size:12px;padding:7px 12px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">RA</div>
+    <div>
+      <div class="logo-title">Rehab Architect</div>
+      <div class="logo-sub">Stroke Gait · Clinical Decision System</div>
+    </div>
+  </div>
+  <div class="lang-toggle">
+    <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" id="btn-th" onclick="setLang('th')">ไทย</button>
+  </div>
+</header>
+
+<div class="container">
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow" id="h-eyebrow">Clinical Reasoning Tool · v1.0</div>
+    <h1 class="hero-title" id="h-title">Stroke Gait Analysis → AFO & Walking Assistance Decision System</h1>
+    <p class="hero-sub" id="h-sub">Structured observational gait scoring for post-stroke hemiplegia. Evaluate 4 domains → receive evidence-informed recommendations.</p>
+    <div class="disclaimer" id="h-disc">⚠ Educational tool — not a substitute for individual clinical assessment</div>
+  </div>
+
+  <!-- GRID -->
+  <div class="grid">
+
+    <!-- LEFT: Input -->
+    <div class="left-col">
+
+      <!-- Progress -->
+      <div class="progress-wrap">
+        <div class="progress-dots" id="progress-dots"></div>
+        <div class="progress-label" id="progress-label">0 / 12 answered</div>
+      </div>
+
+      <!-- Domains rendered by JS -->
+      <div id="domains-container"></div>
+
+      <!-- Evidence -->
+      <div class="evidence-bar">
+        <div class="ev-label" id="ev-label">Evidence Base</div>
+        <div class="ev-refs">
+          <span class="ev-ref">Holden et al., Phys Ther (1984)</span>
+          <span class="ev-ref">Perry & Burnfield, Gait Analysis (2010)</span>
+          <span class="ev-ref">Mehrholz et al., Arch PMR (2007)</span>
+          <span class="ev-ref">Choi et al., Medicine (2023)</span>
+          <span class="ev-ref">RLA Observational Gait Analysis (2001)</span>
+          <span class="ev-ref">Ito et al., AFO prediction PMC (2021)</span>
+        </div>
+      </div>
+
+    </div><!-- /left -->
+
+    <!-- RIGHT: Sidebar -->
+    <div class="sidebar">
+      <!-- Score -->
+      <div class="score-panel">
+        <div class="score-label" id="sl-label">Impairment Severity Score</div>
+        <div>
+          <span class="score-num" id="total-score">0</span>
+          <span class="score-max-lbl"> / 36</span>
+        </div>
+        <div class="score-bar-bg">
+          <div class="score-bar-fill" id="score-bar" style="width:0%"></div>
+        </div>
+        <div class="breakdown">
+          <div class="breakdown-row"><span class="br-name" id="br-A">A · Ankle & Foot</span><span class="br-score" id="brs-A">0/12</span></div>
+          <div class="breakdown-row"><span class="br-name" id="br-B">B · Knee</span><span class="br-score" id="brs-B">0/9</span></div>
+          <div class="breakdown-row"><span class="br-name" id="br-C">C · Hip & Pelvis</span><span class="br-score" id="brs-C">0/9</span></div>
+          <div class="breakdown-row"><span class="br-name" id="br-D">D · Trunk</span><span class="br-score" id="brs-D">0/6</span></div>
+        </div>
+      </div>
+
+      <!-- FAC -->
+      <div class="result-card">
+        <div class="rc-label" id="rc-fac-lbl">FAC-Equivalent Level</div>
+        <div class="rc-icon">🚶</div>
+        <div class="rc-value" id="fac-text"><span style="color:var(--muted)">—</span></div>
+        <div id="fac-badge-wrap"></div>
+        <div class="rc-note" id="fac-note"></div>
+      </div>
+
+      <!-- Assistance -->
+      <div class="result-card">
+        <div class="rc-label" id="rc-assist-lbl">Assistance Level</div>
+        <div class="rc-icon">🤝</div>
+        <div class="rc-value" id="assist-text"><span style="color:var(--muted)">—</span></div>
+      </div>
+
+      <!-- Safety -->
+      <div class="result-card">
+        <div class="rc-label" id="rc-safety-lbl">Safety Recommendation</div>
+        <div class="rc-icon">🛡️</div>
+        <div class="rc-value" id="safety-text"><span style="color:var(--muted)">—</span></div>
+      </div>
+
+      <!-- AFO -->
+      <div class="result-card">
+        <div class="rc-label" id="rc-afo-lbl">AFO Recommendation</div>
+        <div class="rc-icon">🦿</div>
+        <div class="rc-value" id="afo-text"><span style="color:var(--muted)">—</span></div>
+        <div id="afo-chip-wrap"></div>
+        <div class="rc-note" id="afo-note"></div>
+      </div>
+
+      <button class="reset-btn" id="reset-btn" onclick="resetAll()">↺ Reset all</button>
+
+      <div class="side-note" id="side-note">
+        <strong>Scoring note:</strong> Composite impairment index 0–36 from 12 gait items. FAC-equivalent output is based on clinical scoring, not direct timed walking observation (Holden et al., 1984).
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+</div><!-- /container -->
+
+<script>
+/* ═══════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════ */
+const DOMAINS = [
+  { id:'A', emoji:'🦶', classD:'domain-A', max:12,
+    items:['A1','A2','A3','A4'] },
+  { id:'B', emoji:'🦵', classD:'domain-B', max:9,
+    items:['B1','B2','B3'] },
+  { id:'C', emoji:'🦴', classD:'domain-C', max:9,
+    items:['C1','C2','C3'] },
+  { id:'D', emoji:'⚖️', classD:'domain-D', max:6,
+    items:['D1','D2'] },
+];
+
+const T = {
+en: {
+  eyebrow:'Clinical Reasoning Tool · v1.0',
+  title:'Stroke Gait Analysis → AFO & Walking Assistance Decision System',
+  sub:'Structured observational gait scoring for post-stroke hemiplegia. Evaluate 4 domains → receive evidence-informed recommendations.',
+  disc:'⚠ Educational tool — not a substitute for individual clinical assessment',
+  whyLabel:'Why this matters',
+  infoClose:'Close',
+  progressLbl:'answered',
+  evLabel:'Evidence Base',
+  slLabel:'Impairment Severity Score',
+  brA:'A · Ankle & Foot', brB:'B · Knee', brC:'C · Hip & Pelvis', brD:'D · Trunk',
+  facLbl:'FAC-Equivalent Level',
+  assistLbl:'Assistance Level',
+  safetyLbl:'Safety Recommendation',
+  afoLbl:'AFO Recommendation',
+  reset:'↺ Reset all',
+  sideNote:'<strong>Scoring note:</strong> Composite impairment index 0–36 from 12 gait items. FAC-equivalent output is based on clinical scoring, not direct timed walking observation (Holden et al., 1984).',
+  domains:{
+    A:{ title:'A — Ankle & Foot Function',
+        why:'Ankle–foot impairment is the most common driver of gait deviation in stroke. Foot drop, plantarflexor spasticity, and inversion patterns directly impair clearance and push-off mechanics, increasing fall risk and energy cost. AFO decision is primarily informed by this domain.' },
+    B:{ title:'B — Knee Function',
+        why:'Knee hyperextension (genu recurvatum) in stroke is often a compensatory response to ankle instability — not isolated quadriceps overactivity. Knee buckling signals inadequate stance-phase stability and is a direct fall risk.' },
+    C:{ title:'C — Hip & Pelvis',
+        why:'Pelvic drop (Trendelenburg) reflects gluteus medius insufficiency. Hip extension weakness disrupts propulsive force generation — key predictors of community ambulation potential.' },
+    D:{ title:'D — Trunk & Balance',
+        why:'Trunk control is a prerequisite for safe independent gait. Postural instability at gait initiation predicts fall risk and directly informs whether supervision or physical assistance is required.' },
+  },
+  items:{
+    A1:{ label:'Heel strike at initial contact',
+         insight:'Absent heel strike indicates failed dorsiflexion control at initial contact — disrupts loading response. Often signals weak tibialis anterior or excessive plantarflexor tone.',
+         opts:[['Present',0],['Flat foot',1],['Toe-first',2],['Absent',3]] },
+    A2:{ label:'Foot drop during swing phase',
+         insight:'Foot drop = insufficient dorsiflexion during swing. Mild: toe drags intermittently. Severe: consistent drag requiring hip hike or circumduction. Primary AFO indication trigger.',
+         opts:[['None',0],['Mild',1],['Moderate',2],['Severe',3]] },
+    A3:{ label:'Plantarflexor spasticity (Modified Ashworth)',
+         insight:'High plantarflexor tone → equinus → blocks anterior tibial progression → compensatory knee hyperextension. Solid AFO preferred at MAS 2+.',
+         opts:[['None',0],['Mild (MAS 1–1+)',1],['Moderate (MAS 2)',2],['Severe (MAS 3–4)',3]] },
+    A4:{ label:'Foot inversion / equinovarus pattern',
+         insight:'Combined plantarflexion + inversion reduces base of support, increases lateral ankle sprain risk. May require medial posting or AFO with inversion control.',
+         opts:[['Absent',0],['Mild',1],['Moderate',2],['Severe',3]] },
+    B1:{ label:'Knee hyperextension in stance (genu recurvatum)',
+         insight:'Often caused by plantarflexor spasticity blocking tibial progression — not isolated quad overactivity. Assess ankle coupling before attributing to quadriceps.',
+         opts:[['Absent',0],['Mild (<5°)',1],['Moderate (5–10°)',2],['Severe (>10°)',3]] },
+    B2:{ label:'Knee buckling / giving way during stance',
+         insight:'Sudden knee collapse = failure of quadriceps/co-contraction to maintain stance stability. High fall risk. Physical assistance required.',
+         opts:[['Absent',0],['Occasional',1],['Frequent',2],['Consistent',3]] },
+    B3:{ label:'Insufficient knee flexion in swing (stiff-leg)',
+         insight:'Stiff-leg gait requires circumduction or hip hike to clear the foot. Distinct from buckling — indicates spastic quadriceps or hip flexor limitation.',
+         opts:[['Normal',0],['Mild',1],['Moderate',2],['Severe',3]] },
+    C1:{ label:'Pelvic drop / Trendelenburg sign',
+         insight:'Contralateral pelvic drop in single-limb stance = weak ipsilateral gluteus medius → lateral trunk shift, widened base of support.',
+         opts:[['Absent',0],['Mild',1],['Moderate',2],['Severe',3]] },
+    C2:{ label:'Hip extension weakness (stance & push-off)',
+         insight:'Limits push-off propulsion, reducing step length and walking speed. Compensated by anterior trunk lean.',
+         opts:[['None',0],['Mild',1],['Moderate',2],['Severe',3]] },
+    C3:{ label:'Hip circumduction during swing',
+         insight:'Lateral arc of the limb in swing = compensatory strategy for inadequate foot clearance (foot drop + insufficient hip/knee flexion). Indicates multi-level impairment.',
+         opts:[['Absent',0],['Mild',1],['Moderate',2],['Severe',3]] },
+    D1:{ label:'Lateral trunk lean / compensation',
+         insight:'Ipsilateral lean toward affected side compensates for gluteus medius weakness. Contralateral lean = balance strategy. Either pattern elevates fall risk.',
+         opts:[['Absent',0],['Mild',1],['Moderate',2],['Severe',3]] },
+    D2:{ label:'Postural stability at gait initiation',
+         insight:'Dynamic postural stability at gait initiation is a strong predictor of assistance needs. Severe instability here overrides lower limb scores in safety classification.',
+         opts:[['Stable',0],['Mild instability',1],['Moderate instability',2],['Severely unstable',3]] },
+  },
+  fac:[
+    { level:'FAC 0', color:'c-red',   desc:'Non-functional ambulator — cannot walk or requires 2+ persons.', note:'Walking is currently unsafe. Focus on bed mobility, transfer training, and progressive sitting/standing balance.' },
+    { level:'FAC 1', color:'c-red',   desc:'Continuous manual contact — requires firm, continuous support for weight-bearing and balance.', note:'Maximum physical assistance required throughout. High plantarflexor tone + absent heel strike → increased stance instability.' },
+    { level:'FAC 2', color:'c-orange',desc:'Continuous/intermittent manual contact — needs support for balance and coordination.', note:'Physical assistance required. Walking aid prescription and gait-specific physiotherapy recommended.' },
+    { level:'FAC 3', color:'c-yellow',desc:'Verbal supervision/guarding — no physical contact, but supervision required.', note:'Contact Guard Assist (CGA) recommended. Clinician remains within arm\'s reach at all times.' },
+    { level:'FAC 4', color:'c-teal',  desc:'Independent on level ground — needs assistance on stairs, slopes, or uneven terrain.', note:'Safe for independent walking on even surfaces. Supervision recommended for outdoor or uneven terrain.' },
+    { level:'FAC 5', color:'c-green', desc:'Independent on any surface including stairs and outdoor terrain.', note:'Independent ambulation achieved. Community ambulation goals are appropriate.' },
+  ],
+  assist:['Maximum Assistance','Maximum Assistance','Moderate Assistance','Contact Guard / Supervision','Minimal Assistance / Supervision','Independent'],
+  safety:[
+    '⛔ Physical assistance required at all times',
+    '⛔ Physical assistance required',
+    '⚠️ Physical assistance required',
+    '⚠️ Contact Guard Assist (CGA) — clinician within arm\'s reach',
+    '✅ Supervision only — near, not touching',
+    '✅ Safe to walk independently',
+  ],
+  afo:{
+    solid:{ text:'Solid AFO recommended', chip:'Solid AFO', chipClass:'afo-solid',
+            note:'High plantarflexor spasticity or severe instability. Solid AFO provides maximum mediolateral and sagittal ankle control — prevents equinus in stance and varus collapse.' },
+    pls:  { text:'Posterior Leaf Spring (PLS) AFO recommended', chip:'PLS / Flexible AFO', chipClass:'afo-pls',
+            note:'Mild-to-moderate foot drop with manageable spasticity. PLS allows partial ankle energy return during push-off while controlling swing-phase clearance.' },
+    art:  { text:'Articulated / hinged AFO with dorsiflexion assist — consider', chip:'Articulated AFO', chipClass:'afo-art',
+            note:'Foot drop present but spasticity moderate and some voluntary control remains. Articulated AFO allows more physiological tibial progression.' },
+    no:   { text:'AFO not indicated at this stage', chip:'No AFO', chipClass:'afo-no',
+            note:'Adequate ankle dorsiflexion control and heel strike present. Monitor during increased walking distance or fatigue states.' },
+    ask:  { text:'AFO — hands-on assessment needed', chip:'Assess further', chipClass:'afo-ask',
+            note:'Borderline profile. Confirm with tibialis anterior MMT, Modified Ashworth Scale, and dynamic foot clearance observation before prescribing.' },
+  },
+},
+th: {
+  eyebrow:'เครื่องมือฝึก Clinical Reasoning · v1.0',
+  title:'วิเคราะห์การเดินหลัง Stroke → ระบบตัดสินใจ AFO & Walking Assistance',
+  sub:'ระบบการให้คะแนน Observational Gait Analysis ในผู้ป่วย Post-stroke Hemiplegia ประเมิน 4 domain → รับคำแนะนำอิงหลักฐาน',
+  disc:'⚠ เครื่องมือเพื่อการศึกษา — ไม่ใช่การวินิจฉัยทางคลินิก',
+  whyLabel:'ความสำคัญทางคลินิก',
+  infoClose:'ปิด',
+  progressLbl:'ข้อที่ตอบแล้ว',
+  evLabel:'อ้างอิงหลักฐานเชิงประจักษ์',
+  slLabel:'คะแนนความรุนแรงของความบกพร่อง',
+  brA:'A · Ankle & Foot', brB:'B · Knee', brC:'C · Hip & Pelvis', brD:'D · Trunk',
+  facLbl:'ระดับการเดิน (FAC-Equivalent)',
+  assistLbl:'ระดับความช่วยเหลือ (Assistance Level)',
+  safetyLbl:'ข้อแนะนำด้านความปลอดภัย',
+  afoLbl:'คำแนะนำเรื่อง AFO',
+  reset:'↺ รีเซตทั้งหมด',
+  sideNote:'<strong>หมายเหตุ:</strong> Composite impairment index 0–36 จาก 12 รายการสังเกตการเดิน ผลลัพธ์ FAC-equivalent อ้างอิงหลักการ Holden et al. (1984) แต่ไม่ใช่การประเมิน FAC โดยตรง',
+  domains:{
+    A:{ title:'A — Ankle & Foot Function (ข้อเท้าและเท้า)',
+        why:'ความบกพร่องของ ankle–foot เป็นสาเหตุหลักของ gait deviation ใน stroke — Foot drop, plantarflexor spasticity และ equinovarus pattern ส่งผลโดยตรงต่อ foot clearance และ push-off mechanics เพิ่มความเสี่ยงหกล้มและการใช้พลังงาน การตัดสินใจเรื่อง AFO ขึ้นกับ domain นี้เป็นหลัก' },
+    B:{ title:'B — Knee Function (การทำงานของเข่า)',
+        why:'Knee hyperextension (genu recurvatum) ใน stroke มักเป็น compensatory response ต่อ ankle instability — ไม่ใช่ isolated quadriceps overactivity Knee buckling บ่งชี้ความไม่มั่นคงในช่วง stance phase และเพิ่มความเสี่ยงหกล้มโดยตรง' },
+    C:{ title:'C — Hip & Pelvis (สะโพกและอุ้งเชิงกราน)',
+        why:'Pelvic drop (Trendelenburg) สะท้อน gluteus medius insufficiency Hip extension weakness ลดแรง push-off — ทั้งสองเป็นตัวทำนาย community ambulation ที่สำคัญ' },
+    D:{ title:'D — Trunk & Balance (ลำตัวและการทรงตัว)',
+        why:'Trunk control เป็นพื้นฐานของการเดินที่ปลอดภัย Postural instability ขณะ gait initiation ทำนายความต้องการความช่วยเหลือ — โดยไม่ขึ้นกับสภาพขาเดียว' },
+  },
+  items:{
+    A1:{ label:'Heel strike ที่ initial contact',
+         insight:'การขาด heel strike บ่งชี้ว่า dorsiflexion control ล้มเหลวที่ initial contact — รบกวน loading response สัมพันธ์กับ tibialis anterior อ่อนแรง หรือ plantarflexor tone สูง',
+         opts:[['มี (Present)',0],['Flat foot',1],['Toe-first',2],['ไม่มี (Absent)',3]] },
+    A2:{ label:'Foot drop ในช่วง swing phase',
+         insight:'Foot drop = dorsiflexion ไม่เพียงพอในช่วง swing — Mild: นิ้วเท้าลากเป็นครั้งคราว, Severe: ต้องชดเชยด้วย hip hike หรือ circumduction เป็นตัวชี้นำหลักสำหรับ AFO',
+         opts:[['ไม่มี (None)',0],['Mild',1],['Moderate',2],['Severe',3]] },
+    A3:{ label:'Plantarflexor spasticity (Modified Ashworth Scale)',
+         insight:'Plantarflexor tone สูง → equinus → บล็อก anterior tibial progression → เข่า hyperextension แบบ compensatory แนะนำ Solid AFO เมื่อ MAS 2+',
+         opts:[['ไม่มี (None)',0],['Mild (MAS 1–1+)',1],['Moderate (MAS 2)',2],['Severe (MAS 3–4)',3]] },
+    A4:{ label:'Foot inversion / Equinovarus pattern',
+         insight:'Plantarflexion + inversion รวมกัน — ลด base of support เพิ่มความเสี่ยง ankle sprain อาจต้องการ medial posting หรือ AFO ที่ควบคุม inversion',
+         opts:[['ไม่มี (Absent)',0],['Mild',1],['Moderate',2],['Severe',3]] },
+    B1:{ label:'Knee hyperextension ใน stance (Genu recurvatum)',
+         insight:'มักเกิดจาก plantarflexor spasticity บล็อก tibial progression — ไม่ใช่ quad overactivity อย่างเดียว ต้องประเมิน ankle coupling ก่อนสรุป',
+         opts:[['ไม่มี (Absent)',0],['Mild (<5°)',1],['Moderate (5–10°)',2],['Severe (>10°)',3]] },
+    B2:{ label:'Knee buckling / giving way ระหว่าง stance',
+         insight:'เข่าพับฉับพลันระหว่าง stance = quadriceps หรือ co-contraction ล้มเหลว เป็นตัวบ่งชี้ความเสี่ยงหกล้มสูง ต้องการ physical assistance',
+         opts:[['ไม่มี (Absent)',0],['Occasional',1],['Frequent',2],['Consistent',3]] },
+    B3:{ label:'Insufficient knee flexion ใน swing (Stiff-leg gait)',
+         insight:'Stiff-leg gait ต้องการ circumduction หรือ hip hike เพื่อ foot clearance — แตกต่างจาก knee buckling บ่งชี้ spastic quadriceps หรือ hip flexor limitation',
+         opts:[['Normal',0],['Mild',1],['Moderate',2],['Severe',3]] },
+    C1:{ label:'Pelvic drop / Trendelenburg sign',
+         insight:'Contralateral pelvic drop ขณะ single-limb stance = gluteus medius อ่อนแรงด้าน ipsilateral → lateral trunk shift และ base of support กว้างขึ้น',
+         opts:[['ไม่มี (Absent)',0],['Mild',1],['Moderate',2],['Severe',3]] },
+    C2:{ label:'Hip extension weakness (stance & push-off)',
+         insight:'จำกัดแรง push-off ลดความยาวก้าวและความเร็วเดิน มักชดเชยด้วย anterior trunk lean',
+         opts:[['ไม่มี (None)',0],['Mild',1],['Moderate',2],['Severe',3]] },
+    C3:{ label:'Hip circumduction ในช่วง swing',
+         insight:'การแกว่งขาเป็นวงโค้งด้านข้างในช่วง swing = compensatory strategy เมื่อ foot clearance ไม่พอ บ่งชี้ความบกพร่องหลายระดับ',
+         opts:[['ไม่มี (Absent)',0],['Mild',1],['Moderate',2],['Severe',3]] },
+    D1:{ label:'Lateral trunk lean / การชดเชยของลำตัว',
+         insight:'การเอนลำตัวด้าน affected side ชดเชย gluteus medius อ่อนแรง การเอนด้านตรงข้ามอาจเป็น balance strategy — ทั้งสองรูปแบบเพิ่มความเสี่ยงหกล้ม',
+         opts:[['ไม่มี (Absent)',0],['Mild',1],['Moderate',2],['Severe',3]] },
+    D2:{ label:'Postural stability ขณะ gait initiation',
+         insight:'Dynamic stability ขณะเริ่มเดินทำนายความต้องการความช่วยเหลือ ความไม่มั่นคงระดับ severe สามารถ override คะแนน lower limb ในการกำหนดระดับความปลอดภัย',
+         opts:[['มั่นคง (Stable)',0],['Mild instability',1],['Moderate instability',2],['Severely unstable',3]] },
+  },
+  fac:[
+    { level:'FAC 0', color:'c-red',   desc:'เดินไม่ได้ — ต้องการผู้ช่วยตั้งแต่ 2 คนขึ้นไป', note:'การเดินยังไม่ปลอดภัย เน้น bed mobility, transfer training และการทรงตัวในท่านั่ง/ยืน' },
+    { level:'FAC 1', color:'c-red',   desc:'ต้องการ manual contact ตลอดเวลา — พยุงน้ำหนักและทรงตัวอย่างต่อเนื่อง', note:'Maximum physical assistance ตลอดการเดิน Plantarflexor tone สูง + ขาด heel strike → stance instability สูง' },
+    { level:'FAC 2', color:'c-orange',desc:'ต้องการ manual contact เป็นครั้งคราว — ช่วย balance และ coordination', note:'Physical assistance จำเป็น แนะนำ walking aid และ gait-specific physiotherapy' },
+    { level:'FAC 3', color:'c-yellow',desc:'ต้องการ verbal supervision — ไม่ต้องสัมผัสกาย แต่ต้องดูแล', note:'Contact Guard Assist (CGA) แนะนำ — นักกายภาพอยู่ในระยะช่วยเหลือได้ทันที' },
+    { level:'FAC 4', color:'c-teal',  desc:'เดินอิสระบนพื้นราบ — ต้องการความช่วยเหลือบนบันได พื้นลาด หรือพื้นไม่เรียบ', note:'ปลอดภัยสำหรับการเดินอิสระบนพื้นเรียบ ต้องการ supervision นอกอาคาร' },
+    { level:'FAC 5', color:'c-green', desc:'เดินอิสระได้ทุกพื้นผิว รวมถึงบันไดและนอกอาคาร', note:'บรรลุ independent ambulation เป้าหมาย community ambulation เหมาะสม' },
+  ],
+  assist:['Maximum Assistance','Maximum Assistance','Moderate Assistance','Contact Guard / Supervision','Minimal Assistance / Supervision','Independent'],
+  safety:[
+    '⛔ ต้องการความช่วยเหลือทางกายตลอดเวลา',
+    '⛔ ต้องการ Physical Assistance',
+    '⚠️ ต้องการ Physical Assistance',
+    '⚠️ Contact Guard Assist (CGA) — อยู่ในระยะช่วยเหลือได้ทันที',
+    '✅ Supervision เท่านั้น — อยู่ใกล้แต่ไม่สัมผัส',
+    '✅ ปลอดภัยสำหรับการเดินอิสระ',
+  ],
+  afo:{
+    solid:{ text:'แนะนำ Solid AFO', chip:'Solid AFO', chipClass:'afo-solid',
+            note:'Plantarflexor spasticity สูง หรือ instability รุนแรง — Solid AFO ให้ ankle control สูงสุดทั้งแนว mediolateral และ sagittal ป้องกัน equinus ขณะ stance และ varus collapse' },
+    pls:  { text:'แนะนำ Posterior Leaf Spring (PLS) AFO', chip:'PLS / Flexible AFO', chipClass:'afo-pls',
+            note:'Foot drop ระดับ mild-to-moderate พร้อม spasticity ที่ควบคุมได้ — PLS ช่วยให้มี energy return บางส่วนขณะ push-off และควบคุม swing-phase clearance' },
+    art:  { text:'พิจารณา Articulated / Hinged AFO พร้อม dorsiflexion assist', chip:'Articulated AFO', chipClass:'afo-art',
+            note:'มี foot drop แต่ spasticity ระดับ moderate และยังมี voluntary control — Articulated AFO ช่วยให้ tibial progression มีสรีรภาพมากขึ้น' },
+    no:   { text:'ไม่จำเป็นต้องใช้ AFO ในขณะนี้', chip:'ไม่ต้องใช้ AFO', chipClass:'afo-no',
+            note:'Dorsiflexion control เพียงพอและมี heel strike ควร monitor เมื่อผู้ป่วยเหนื่อยล้าหรือเดินระยะทางมากขึ้น' },
+    ask:  { text:'AFO — ต้องประเมินเพิ่มเติมด้วยมือ', chip:'ต้องประเมินเพิ่มเติม', chipClass:'afo-ask',
+            note:'ข้อมูลยังไม่ชัดเจน ยืนยันด้วย tibialis anterior MMT, Modified Ashworth Scale และ dynamic foot clearance observation ก่อนจ่ายอุปกรณ์' },
+  },
+},
+};
+
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
+let lang = 'en';
+let scores = {};
+let openInsight = null; // currently open insight panel id
+
+/* ═══════════════════════════════════════════════
+   BUILD DOM
+═══════════════════════════════════════════════ */
+function buildDomains() {
+  const container = document.getElementById('domains-container');
+  container.innerHTML = '';
+  const t = T[lang];
+
+  DOMAINS.forEach(domain => {
+    const dData = t.domains[domain.id];
+    const dScore = domainScore(domain.id);
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.id = 'card-' + domain.id;
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'card-header open';
+    header.id = 'hdr-' + domain.id;
+    header.innerHTML = `
+      <div class="domain-badge ${domain.classD}">${domain.emoji}</div>
+      <div class="card-title" id="dtitle-${domain.id}">${dData.title}</div>
+      <div class="domain-score-badge" id="dscore-${domain.id}">${dScore} / ${domain.max}</div>
+      <span class="chevron">▾</span>
+    `;
+    header.addEventListener('click', () => toggleCard(domain.id));
+    card.appendChild(header);
+
+    // Body
+    const body = document.createElement('div');
+    body.className = 'card-body visible';
+    body.id = 'body-' + domain.id;
+
+    // Why panel
+    const why = document.createElement('div');
+    why.className = 'card-why';
+    why.innerHTML = `<div class="card-why-label" id="whylbl-${domain.id}">${t.whyLabel}</div><span id="dwhy-${domain.id}">${dData.why}</span>`;
+    body.appendChild(why);
+
+    // Items
+    domain.items.forEach(itemId => {
+      body.appendChild(buildItemEl(itemId));
+    });
+
+    card.appendChild(body);
+    container.appendChild(card);
+  });
+}
+
+function buildItemEl(itemId) {
+  const t = T[lang];
+  const item = t.items[itemId];
+
+  const group = document.createElement('div');
+  group.className = 'item-group';
+  group.id = 'grp-' + itemId;
+
+  // Header row: info btn + label
+  const hdr = document.createElement('div');
+  hdr.className = 'item-header';
+
+  const infoBtn = document.createElement('button');
+  infoBtn.className = 'info-btn';
+  infoBtn.id = 'ibtn-' + itemId;
+  infoBtn.setAttribute('aria-label', 'Clinical insight');
+  infoBtn.textContent = 'ⓘ';
+  infoBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleInsight(itemId);
+  });
+
+  const lbl = document.createElement('span');
+  lbl.className = 'item-label-text';
+  lbl.id = 'lbl-' + itemId;
+  lbl.textContent = item.label;
+
+  hdr.appendChild(infoBtn);
+  hdr.appendChild(lbl);
+  group.appendChild(hdr);
+
+  // Insight panel (inline, not absolute)
+  const insight = document.createElement('div');
+  insight.className = 'insight-panel';
+  insight.id = 'insight-' + itemId;
+  insight.textContent = item.insight;
+  group.appendChild(insight);
+
+  // Options
+  const opts = document.createElement('div');
+  opts.className = 'options';
+  opts.id = 'opts-' + itemId;
+  group.appendChild(opts);
+
+  buildOptions(itemId, opts);
+  return group;
+}
+
+function buildOptions(itemId, container) {
+  const t = T[lang];
+  const item = t.items[itemId];
+  if (!container) container = document.getElementById('opts-' + itemId);
+  if (!container) return;
+  container.innerHTML = '';
+  item.opts.forEach(([label, val]) => {
+    const btn = document.createElement('button');
+    const sel = scores[itemId] === val;
+    btn.className = 'opt-btn' + (sel ? ' sel-' + val : '');
+    btn.textContent = label;
+    btn.addEventListener('click', () => {
+      scores[itemId] = val;
+      rebuildOptions(itemId);
+      updateResults();
+    });
+    container.appendChild(btn);
+  });
+}
+
+function rebuildOptions(itemId) {
+  buildOptions(itemId, document.getElementById('opts-' + itemId));
+}
+
+function toggleInsight(itemId) {
+  const panel = document.getElementById('insight-' + itemId);
+  const btn = document.getElementById('ibtn-' + itemId);
+  if (!panel) return;
+  const isOpen = panel.classList.contains('visible');
+  // close any open
+  document.querySelectorAll('.insight-panel.visible').forEach(p => p.classList.remove('visible'));
+  document.querySelectorAll('.info-btn.active').forEach(b => b.classList.remove('active'));
+  if (!isOpen) {
+    panel.classList.add('visible');
+    btn.classList.add('active');
+    openInsight = itemId;
+  } else {
+    openInsight = null;
+  }
+}
+
+function toggleCard(domainId) {
+  const body = document.getElementById('body-' + domainId);
+  const hdr  = document.getElementById('hdr-' + domainId);
+  if (!body || !hdr) return;
+  const isOpen = body.classList.contains('visible');
+  body.classList.toggle('visible', !isOpen);
+  hdr.classList.toggle('open', !isOpen);
+}
+
+/* ═══════════════════════════════════════════════
+   SCORE LOGIC
+═══════════════════════════════════════════════ */
+function domainScore(d) {
+  const ids = DOMAINS.find(x => x.id === d).items;
+  return ids.reduce((s, id) => s + (scores[id] !== undefined ? scores[id] : 0), 0);
+}
+function totalScore() {
+  return DOMAINS.reduce((s, d) => s + domainScore(d.id), 0);
+}
+function answeredCount() {
+  let all = [];
+  DOMAINS.forEach(d => all = all.concat(d.items));
+  return all.filter(id => scores[id] !== undefined).length;
+}
+function totalItems() {
+  return DOMAINS.reduce((s, d) => s + d.items.length, 0);
+}
+
+// FAC-equivalent: 0–36 scale, higher = worse
+function computeFAC(total) {
+  if (total >= 30) return 0;
+  if (total >= 24) return 1;
+  if (total >= 18) return 2;
+  if (total >= 12) return 3;
+  if (total >= 5)  return 4;
+  return 5;
+}
+
+function computeAFO() {
+  const a1 = scores['A1'] || 0; // heel strike (higher = worse)
+  const a2 = scores['A2'] || 0; // foot drop
+  const a3 = scores['A3'] || 0; // spasticity
+  const a4 = scores['A4'] || 0; // inversion
+
+  const footDrop = a2 >= 1;
+  const highTone = a3 >= 2;
+  const severeInstab = a3 >= 2 || (a4 >= 2 && a2 >= 2);
+
+  if (!footDrop && a1 === 0 && a4 === 0) return 'no';
+  if (footDrop && severeInstab) return 'solid';
+  if (footDrop && a3 === 1) return 'pls';
+  if (footDrop && a3 === 2) return 'art';
+  if (footDrop) return 'ask';
+  return 'ask';
+}
+
+/* ═══════════════════════════════════════════════
+   UPDATE RESULTS
+═══════════════════════════════════════════════ */
+function updateResults() {
+  const t = T[lang];
+  const total = totalScore();
+  const pct = (total / 36) * 100;
+  const fac = computeFAC(total);
+  const afoKey = computeAFO();
+
+  // Score bar
+  document.getElementById('total-score').textContent = total;
+  const bar = document.getElementById('score-bar');
+  bar.style.width = pct + '%';
+  bar.style.background = pct < 28 ? '#2ea043' : pct < 50 ? '#d29922' : pct < 72 ? '#f97316' : '#da3633';
+
+  // Domain breakdown
+  DOMAINS.forEach(d => {
+    const ds = domainScore(d.id);
+    document.getElementById('dscore-' + d.id).textContent = ds + ' / ' + d.max;
+    document.getElementById('brs-' + d.id).textContent = ds + '/' + d.max;
+  });
+
+  // Progress
+  const ans = answeredCount();
+  const tot = totalItems();
+  document.getElementById('progress-label').textContent = ans + ' / ' + tot + ' ' + t.progressLbl;
+  const dots = document.getElementById('progress-dots');
+  const allItems = [];
+  DOMAINS.forEach(d => d.items.forEach(id => allItems.push(id)));
+  dots.innerHTML = '';
+  allItems.forEach(id => {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (scores[id] !== undefined ? ' answered' : '');
+    dots.appendChild(dot);
+  });
+
+  // FAC
+  const facData = t.fac[fac];
+  document.getElementById('fac-text').innerHTML =
+    '<span class="' + facData.color + '">' + facData.level + '</span>' +
+    '<br><span style="color:var(--muted);font-size:12px;font-weight:400">' + facData.desc + '</span>';
+  document.getElementById('fac-badge-wrap').innerHTML =
+    '<span class="fac-badge fb-' + fac + '">FAC ' + fac + '</span>';
+  const facNote = document.getElementById('fac-note');
+  facNote.textContent = facData.note;
+  facNote.classList.add('visible');
+
+  // Assistance
+  const assistColors = ['c-red','c-red','c-orange','c-yellow','c-teal','c-green'];
+  document.getElementById('assist-text').innerHTML =
+    '<span class="' + assistColors[fac] + '">' + t.assist[fac] + '</span>';
+
+  // Safety — upgrade risk if knee buckling or trunk instability severe
+  let safetyIdx = fac;
+  if ((scores['B2'] || 0) >= 2 && safetyIdx > 2) safetyIdx = 2;
+  if ((scores['D2'] || 0) >= 2 && safetyIdx > 3) safetyIdx = 3;
+  document.getElementById('safety-text').textContent = t.safety[safetyIdx];
+
+  // AFO
+  const afoData = t.afo[afoKey];
+  document.getElementById('afo-text').textContent = afoData.text;
+  document.getElementById('afo-chip-wrap').innerHTML =
+    '<span class="afo-chip ' + afoData.chipClass + '">' + afoData.chip + '</span>';
+  const afoNote = document.getElementById('afo-note');
+  afoNote.textContent = afoData.note;
+  afoNote.classList.add('visible');
+}
+
+/* ═══════════════════════════════════════════════
+   LANGUAGE
+═══════════════════════════════════════════════ */
+function setLang(l) {
+  lang = l;
+  document.getElementById('btn-en').classList.toggle('active', l === 'en');
+  document.getElementById('btn-th').classList.toggle('active', l === 'th');
+  applyStaticText();
+  buildDomains(); // rebuild all domain cards with new language
+  updateResults();
+}
+
+function applyStaticText() {
+  const t = T[lang];
+  document.getElementById('h-eyebrow').textContent = t.eyebrow;
+  document.getElementById('h-title').textContent   = t.title;
+  document.getElementById('h-sub').textContent     = t.sub;
+  document.getElementById('h-disc').textContent    = t.disc;
+  document.getElementById('ev-label').textContent  = t.evLabel;
+  document.getElementById('sl-label').textContent  = t.slLabel;
+  document.getElementById('br-A').textContent = t.brA;
+  document.getElementById('br-B').textContent = t.brB;
+  document.getElementById('br-C').textContent = t.brC;
+  document.getElementById('br-D').textContent = t.brD;
+  document.getElementById('rc-fac-lbl').textContent    = t.facLbl;
+  document.getElementById('rc-assist-lbl').textContent = t.assistLbl;
+  document.getElementById('rc-safety-lbl').textContent = t.safetyLbl;
+  document.getElementById('rc-afo-lbl').textContent    = t.afoLbl;
+  document.getElementById('reset-btn').textContent     = t.reset;
+  document.getElementById('side-note').innerHTML       = t.sideNote;
+}
+
+/* ═══════════════════════════════════════════════
+   RESET
+═══════════════════════════════════════════════ */
+function resetAll() {
+  scores = {};
+  openInsight = null;
+  buildDomains();
+  // Reset result panels
+  document.getElementById('fac-text').innerHTML = '<span style="color:var(--muted)">—</span>';
+  document.getElementById('assist-text').innerHTML = '<span style="color:var(--muted)">—</span>';
+  document.getElementById('safety-text').innerHTML = '<span style="color:var(--muted)">—</span>';
+  document.getElementById('afo-text').innerHTML = '<span style="color:var(--muted)">—</span>';
+  document.getElementById('fac-badge-wrap').innerHTML = '';
+  document.getElementById('afo-chip-wrap').innerHTML = '';
+  document.getElementById('fac-note').classList.remove('visible');
+  document.getElementById('afo-note').classList.remove('visible');
+  document.getElementById('total-score').textContent = '0';
+  document.getElementById('score-bar').style.width = '0%';
+  document.getElementById('score-bar').style.background = '#2ea043';
+  DOMAINS.forEach(d => {
+    document.getElementById('brs-' + d.id).textContent = '0/' + d.max;
+  });
+  // Progress dots
+  const dots = document.getElementById('progress-dots');
+  dots.innerHTML = '';
+  const allItems = [];
+  DOMAINS.forEach(d => d.items.forEach(id => allItems.push(id)));
+  allItems.forEach(() => {
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    dots.appendChild(dot);
+  });
+  document.getElementById('progress-label').textContent = '0 / ' + totalItems() + ' ' + T[lang].progressLbl;
+}
+
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+applyStaticText();
+buildDomains();
+// init progress dots
+const allItems0 = [];
+DOMAINS.forEach(d => d.items.forEach(id => allItems0.push(id)));
+const dotsEl = document.getElementById('progress-dots');
+allItems0.forEach(() => {
+  const dot = document.createElement('div');
+  dot.className = 'dot';
+  dotsEl.appendChild(dot);
+});
+document.getElementById('progress-label').textContent = '0 / ' + totalItems() + ' ' + T[lang].progressLbl;
+</script>
+</body>
+</html>
